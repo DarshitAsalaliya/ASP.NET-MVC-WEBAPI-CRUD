@@ -1,0 +1,117 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using LINQTOSQL.Models;
+
+namespace LINQTOSQL.Controllers
+{
+    public class UserController : Controller
+    {
+        DataClassesDataContext db = new DataClassesDataContext();
+
+        // GET: User
+        public ActionResult Index(string txtSearch)
+        {
+            if(txtSearch!=null)
+            {
+                var searchQueryList = from u in db.TblUsers.ToList()
+                            join d in db.TblDepartments.ToList() on u.DID equals d.DID
+                            where u.UNAME.ToLower().Contains(txtSearch.ToLower())
+                            select new UserDetail { userobj = u, departmentobj = d };
+
+                return View(searchQueryList.ToList());
+            }
+
+            var queryList = from u in db.TblUsers.ToList()
+                        join d in db.TblDepartments.ToList() on u.DID equals d.DID
+                        select new UserDetail { userobj = u, departmentobj = d };
+
+            return View(queryList.ToList());
+        }
+
+        // GET: User/Details/5
+        public ActionResult Details(int id)
+        {
+            return View(db.TblUsers.Where(s => s.UID == id).SingleOrDefault());
+        }
+
+        // GET: User/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: User/Create
+        [HttpPost]
+        public ActionResult Create(TblUser uobj)
+        {
+            try
+            {
+                // TODO: Add insert logic here
+
+                db.TblUsers.InsertOnSubmit(uobj);
+                db.SubmitChanges();
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: User/Edit/5
+        public ActionResult Edit(int id)
+        {
+            return View(db.TblUsers.Where(s => s.UID == id).SingleOrDefault());
+        }
+
+        // POST: User/Edit/5
+        [HttpPost]
+        public ActionResult Edit(int id, TblUser uobj)
+        {
+            try
+            {
+                // TODO: Add update logic here
+                TblUser obj = db.TblUsers.Where(s => s.UID == id).Single();
+
+                obj.UNAME = uobj.UNAME;
+                obj.DID = uobj.DID;
+
+                db.SubmitChanges();
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: User/Delete/5
+        public ActionResult Delete(int id)
+        {
+            return View(db.TblUsers.Where(s => s.UID == id).SingleOrDefault());
+        }
+
+        // POST: User/Delete/5
+        [HttpPost]
+        public ActionResult Delete(int id, TblUser uobj)
+        {
+            try
+            {
+                // TODO: Add delete logic here
+                TblUser obj = db.TblUsers.Where(s => s.UID == id).Single();
+                
+                db.TblUsers.DeleteOnSubmit(obj);
+                db.SubmitChanges();
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+    }
+}
